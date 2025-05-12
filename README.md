@@ -2,3 +2,5 @@
 nombre de integrantes :
 1. Portillo maria belen, usuario: Belenpor
 2. Callahuanca Julio Ivan - usuario : Ivan1Julio
+
+4. Valeriano Hernán Joaquín - usuario: ValerianoHJ

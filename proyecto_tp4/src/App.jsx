@@ -1,41 +1,50 @@
-import { useState } from 'react'
-import TaskList from './components/TaskList'
-import TaskInput from './components/TaskInput'
-import './App.css'
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import ProductForm from './Componentes/ProductForm';
+import ProductList from './Componentes/ProductList';
+import SearchBar from './Componentes/SearchBar';
 
 function App() {
- 
-      const [tasks, setTasks] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
 
-      const addTask = (text) => {
-        const newTask = { id: Date.now(), text, completed: false};
-        setTasks([...tasks, newTask]);
-      };
-      const toggleTask = (id) => {
-        setTasks(tasks.map(task => 
-          task.id === id ? {...task, completed: !task.completed}:task
-        ));
-      };
-      const deleteTask = (id) => {
-        setTasks(tasks.filter(task => task.id !== id));
-      };
+  // Mostrar cambios en consola
+  useEffect(() => {
+    console.log('Lista de productos actualizada:', products);
+  }, [products]);
+
+  const handleAddOrEdit = useCallback((product) => {
+    setProducts(prev => {
+      const existing = prev.find(p => p.id === product.id);
+      if (existing) {
+        return prev.map(p => p.id === product.id ? product : p);
+      }
+      return [...prev, product];
+    });
+    setEditingProduct(null);
+  }, []);
+
+  const handleDelete = useCallback((id) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+  }, []);
+
+  const handleEdit = useCallback((product) => {
+    setEditingProduct(product);
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(p =>
+      p.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.id.toString().includes(searchTerm)
+    );
+  }, [products, searchTerm]);
 
   return (
-
-    <div style={{
-      maxWidth: "600px",
-      margin: "40px auto",
-      padding: "20px",
-      background: "#fff",
-      borderRadius: "10px",
-      boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-    }}
-    >
-
-    <h1 style={{ frontSize: "28px", frontWeight: "bold" }}>Lista de Tareas</h1>
-      <TaskInput onAddTask={addTask}/>
-      <TaskList tasks={tasks}
-      onToggle={toggleTask} onDelete={deleteTask}/>
+    <div className="container">
+      <h1>Gestión de Productos</h1>
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <ProductForm onSubmit={handleAddOrEdit} editingProduct={editingProduct} />
+      <ProductList products={filteredProducts} onDelete={handleDelete} onEdit={handleEdit} />
     </div>
   );
 }
